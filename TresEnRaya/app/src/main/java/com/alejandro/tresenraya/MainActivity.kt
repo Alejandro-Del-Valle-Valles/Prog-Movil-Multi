@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
 
     fun onClickPlay(view: View) {
         val intent = Intent(this, GameActivity::class.java)
-        intent.putExtra("PalyerOne", binding.etNamePlayerOne.toString())
+        intent.putExtra("PlayerOne", binding.etNamePlayerOne.toString())
         intent.putExtra("PlayerTwo", binding.etNamePlayerTwo.toString())
         startActivity(intent)
     }
