@@ -51,7 +51,6 @@
         android:layout_width="176dp"
         android:layout_height="99dp"
         android:backgroundTint="#F80202"
-        android:onClick="onClickPlay"
         android:text="Jugar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

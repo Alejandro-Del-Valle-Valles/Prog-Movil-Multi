@@ -1,15 +1,11 @@
-package com.alejandro.tresenraya.Activities
+package com.alejandro.tresenraya.activities
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.alejandro.tresenraya.R
 import com.alejandro.tresenraya.databinding.ActivityMainBinding
 
-class GameActivity : AppCompatActivity() {
-
+class WinnerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {

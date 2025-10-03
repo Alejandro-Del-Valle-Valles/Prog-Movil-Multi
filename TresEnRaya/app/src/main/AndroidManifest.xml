@@ -12,10 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TresEnRaya">
         <activity
-            android:name=".Activities.WinnerActivity"
+            android:name=".activities.WinnerActivity"
             android:exported="false" />
         <activity
-            android:name=".Activities.GameActivity"
+            android:name=".activities.GameActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
