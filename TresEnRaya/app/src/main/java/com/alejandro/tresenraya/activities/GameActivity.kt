@@ -1,25 +1,32 @@
 package com.alejandro.tresenraya.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.alejandro.tresenraya.R
+import com.alejandro.tresenraya.data.StaticData
 import com.alejandro.tresenraya.databinding.ActivityGameBinding
 
 class GameActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityGameBinding
+    private lateinit var playerOne: String //Name of player One
+    private lateinit var playerTwo: String //Name of player Two
+    private var gameResult: Boolean? = null // null = game continues, true = there is a winner, false = tie
     private var dashboard: Array<Array<Boolean?>> = Array(3) { arrayOfNulls<Boolean>(3) }
-    private var counter = 0
+    private var counter = 0 // Count the number of plays. Max 9 plays. Odd = player 1, Even = player 2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.tvPlayer.text = "Turno de ${intent.getStringExtra("PlayerOne")}"
+        playerOne = intent.getStringExtra("PlayerOne").toString()
+        playerTwo = intent.getStringExtra("PlayerTwo").toString()
+        binding.tvPlayer.text = "Turno de $playerOne"
     }
 
     /**
@@ -32,17 +39,24 @@ class GameActivity : AppCompatActivity() {
         val btImage = view as ImageButton
         btImage.isEnabled = false
         counter++
-        if (counter % 2 == 0) {
+
+        if (counter % 2 != 0) { // Player 1 (odd)
             btImage.setImageResource(R.mipmap.cross)
-            binding.tvPlayer.text = "Turno de ${intent.getStringExtra("PlayerTwo")}"
+            binding.tvPlayer.text = "Turno de $playerTwo"
             getPosition(btImage.tag.toString().toInt(), true) //True player 1
-            if(checkWinner()) finish() //TODO: Pasar al ganador y pasarle el nombre
-        }
-        else {
+            gameResult = checkWinner()
+            if (gameResult == true) showWinner(playerOne)
+        } else { // Player 2 (even)
             btImage.setImageResource(R.mipmap.circle)
-            binding.tvPlayer.text = "Turno de ${intent.getStringExtra("PlayerOne")}"
+            binding.tvPlayer.text = "Turno de $playerOne"
             getPosition(btImage.tag.toString().toInt(), false) //False player 2
-            if(checkWinner()) finish() //TODO: Pasar al ganador y pasarle el nombre
+            gameResult = checkWinner()
+            if (gameResult == true) showWinner(playerTwo)
+        }
+
+        // Check if there is a tie
+        if (gameResult == false && counter == 9) {
+            showWinner(StaticData.GAME_TIE)
         }
     }
 
@@ -51,7 +65,7 @@ class GameActivity : AppCompatActivity() {
      * @param position Int position of the button clicked
      * @param player Boolean true if player 1, false if player 2
      */
-    fun getPosition(position: Int, player: Boolean) {
+    private fun getPosition(position: Int, player: Boolean) {
         when (position) {
             0 -> dashboard[0][0] = player
             1 -> dashboard[0][1] = player
@@ -66,30 +80,52 @@ class GameActivity : AppCompatActivity() {
     }
 
     /**
-     * Check if there is a winner
-     * @return Boolean true if there is a winner, false otherwise
+     * Check if there is a winner.
+     * @return Boolean: true if a player has won, false if there is a tie, null if the game continues.
      */
-    fun checkWinner(): Boolean {
+    private fun checkWinner(): Boolean? {
         // Check rows and columns
         for (i in 0..2) {
             if (dashboard[i][0] != null && dashboard[i][0] == dashboard[i][1]
-                && dashboard[i][1] == dashboard[i][2]) {
-                return true
+                && dashboard[i][1] == dashboard[i][2]
+            ) {
+                return true // Winner in a row
             }
             if (dashboard[0][i] != null && dashboard[0][i] == dashboard[1][i]
-                && dashboard[1][i] == dashboard[2][i]) {
-                return true
+                && dashboard[1][i] == dashboard[2][i]
+            ) {
+                return true // Winner in a column
             }
         }
         // Check diagonals
         if (dashboard[0][0] != null && dashboard[0][0] == dashboard[1][1]
-            && dashboard[1][1] == dashboard[2][2]) {
-            return true
+            && dashboard[1][1] == dashboard[2][2]
+        ) {
+            return true // Winner in the main diagonal
         }
         if (dashboard[0][2] != null && dashboard[0][2] == dashboard[1][1]
-            && dashboard[1][1] == dashboard[2][0]) {
-            return true
+            && dashboard[1][1] == dashboard[2][0]
+        ) {
+            return true // Winner in the secondary diagonal
         }
-        return false
+
+        // If all cells are filled and there is no winner, it's a tie
+        if (counter == 9) {
+            return false // Tie
+        }
+
+        // If no winner and the game is not over, return null
+        return null
+    }
+
+    /**
+     * Show the winner activity when the game is over
+     * @param winner String the name of the winner
+     */
+    private fun showWinner(winner: String) {
+        val intent = Intent(this, WinnerActivity::class.java)
+        intent.putExtra("Winner", winner)
+        startActivity(intent)
+        finish()
     }
 }
