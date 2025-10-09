@@ -33,10 +33,6 @@ class MainActivity : AppCompatActivity() {
 
         if (currentOperation == "0" && valueString != "0") {
             updateConsole(valueString, false)
-        } else if (currentOperation == "0" && valueString == "0") {
-            // Do nothing if current is "0" and "0" is pressed
-        } else {
-            updateConsole(valueString)
         }
     }
 
@@ -83,7 +79,8 @@ class MainActivity : AppCompatActivity() {
         val operatorSymbol = pressedButton.text.toString()
 
         // Avoid duplicate operators or operators at the start (unless it's '√')
-        if (currentOperation.isNotEmpty() && !currentOperation.last().isDigit() && currentOperation.last() != '.' && operatorSymbol != "√") {
+        if (currentOperation.isNotEmpty() && !currentOperation.last().isDigit()
+            && currentOperation.last() != '.' && operatorSymbol != "√") {
             // Replace the last operator if another is pressed (and it's not '√')
             if (getOperator(currentOperation.last()) != null && currentOperation.length > 1) {
                 currentOperation = currentOperation.dropLast(1)
