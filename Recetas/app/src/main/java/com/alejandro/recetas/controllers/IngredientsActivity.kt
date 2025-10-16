@@ -16,4 +16,8 @@ class IngredientsActivity : AppCompatActivity() {
         binding = ActivityIngredientsBinding.inflate(layoutInflater)
         setContentView(binding.root)
     }
+
+    /*TODO: Implementar la lógica para que consiga las recetas y muestre todos los ingredientes
+    y los agrupe en el caso de que haya varios iguales.
+    */
 }

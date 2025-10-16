@@ -21,18 +21,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun deleteTvTwo() {
-        binding.tvTextTwo.visibility = View.GONE
+        binding.tvTextTwo.visibility = View.INVISIBLE
 
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(binding.main)
+        val cs = ConstraintSet()
+        cs.clone(binding.main)
 
-        constraintSet.connect(
-            binding.tvTextThree.id, // El ID del view a modificar (tvTextThree)
-            ConstraintSet.TOP,      // Su ancla superior (TOP)
-            binding.tvTextOne.id,   // El ID del view al que se enlazará (tvTextOne)
-            ConstraintSet.BOTTOM,    // El ancla inferior del view de destino (BOTTOM)
+        cs.connect(
+            binding.tvTextThree.id,
+            ConstraintSet.TOP,
+            binding.tvTextOne.id,
+            ConstraintSet.BOTTOM,
             10
         )
-        constraintSet.applyTo(binding.main)
+
+        cs.clear(
+            binding.tvTextThree.id,
+            ConstraintSet.BOTTOM
+        )
+        cs.applyTo(binding.main)
     }
 }

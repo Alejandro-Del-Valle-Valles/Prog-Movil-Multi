@@ -17,11 +17,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
     }
 
+    /**
+     * When Ingredients is clicked, starts the Ingredients Activity.
+     */
     fun onIngredientsClicked(view: View) {
         val intent = Intent(this, IngredientsActivity::class.java)
         startActivity(intent)
     }
 
+    /**
+     * When Resume is clicked, starts the Resume Activity
+     */
     fun onResumeClicked(view: View) {
         val intent = Intent(this, ResumeActivity::class.java)
         startActivity(intent)
