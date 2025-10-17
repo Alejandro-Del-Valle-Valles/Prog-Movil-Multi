@@ -31,7 +31,7 @@ class ResumeActivity : AppCompatActivity() {
     private fun showRecipe() {
         val recipes = JsonService.getRecipes(this)
         val container = binding.lyRecipes
-         container.removeAllViews()
+        container.removeAllViews()
         recipes?.forEach { recipe ->
             container.addView(
                 createView(
