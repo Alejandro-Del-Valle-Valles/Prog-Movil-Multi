@@ -12,6 +12,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.alejandro.recetas.databinding.ActivityIngredientsBinding
 import com.alejandro.recetas.services.JsonService
+import android.content.Context
 
 class IngredientsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityIngredientsBinding
@@ -34,61 +35,141 @@ class IngredientsActivity : AppCompatActivity() {
     private fun showIngredients() {
         val container = binding.lyIngredients
         container.removeAllViews()
-        normalizeIngredients().forEach {
+        normalizeIngredients(this).forEach {
             container.addView(createCheckBox(it))
             addSeparatorView(container)
         }
     }
 
-    private fun normalizeIngredients(): MutableList<String> {
-        val recipes = JsonService.getRecipes(this) // Get all recipes
+    /**
+     * Normalizes the ingredient list from all recipes.
+     *
+     * This function extracts all ingredients from all recipes and processes them
+     * to create a normalized list.
+     *
+     * @param context The context, needed by JsonService.
+     * @return A mutable list of unique, normalized ingredient strings.
+     */
+    private fun normalizeIngredients(context: Context): MutableList<String> {
 
-        val allIngredients = mutableListOf<String>()
-        recipes?.forEach { recipe ->
-            recipe.ingredients.forEach { allIngredients.add(it) }
-        } // Add to a list all ingredients from all recipes
+        // and Recipe has a property 'ingredients' which is Array<String>
+        val recipes = JsonService.getRecipes(context)
 
-        val ingredientsWithUnits = mutableListOf<String>()
-        allIngredients.forEach {
-            if(it[0].isDigit()) ingredientsWithUnits.add(it)
-        } // Filter ingredients that start with a digit (indicating quantity/unit)
+        // 1. Flatten all ingredient lists into one, trimming and lowercasing.
+        val allIngredients = recipes?.flatMap { it.ingredients.toList() }
+            ?.map { it.lowercase().trim() }
+            ?: emptyList()
 
-        val restOfIngredients = mutableListOf<String>()
-        allIngredients.forEach {
-            if(!ingredientsWithUnits.contains(it)
-                && !restOfIngredients.contains(it)) restOfIngredients.add(it)
-        } //Add to another list the rest of ingredients that don't start with a digit
+        // 2. Define words to skip when parsing ingredients with units.
+        //    We ONLY skip simple abbreviations (g, kg) and prepositions (de).
+        //    We DO NOT skip descriptive units (cup, clove, tbsp, cucharada)
+        //    as they are part of the ingredient base.
+        val skippableWords = setOf(
+            "g", "kg", "mg", "l", "ml", "oz", "lb", "lbs",
+            "de", "of", "a"
+        )
 
-        val ingredientsWithoutUnits = mutableListOf<String>()
-        ingredientsWithUnits.forEach {
-            ingredientsWithoutUnits.add(it.substring(1).trim())
-        } //Adds to another list the ingredients that has unit but with out it.
+        // 3. Group all original ingredients by their singular base form.
+        val baseIngredientMap = mutableMapOf<String, MutableList<String>>()
 
-        val repeatedIngredientsWithUnits = mutableListOf<String>()
-        ingredientsWithoutUnits.forEach { ingredients ->
-            val words = ingredients.trim().lowercase().split(" ")
-            val firstWord = words.first()
-            val restOfWords = words.drop(1).joinToString(" ")
+        allIngredients.forEach { ingredient ->
+            val singularBase = getSingularBaseIngredient(ingredient, skippableWords)
+            if (singularBase.isNotBlank()) {
+                baseIngredientMap.getOrPut(singularBase) { mutableListOf() }
+                    .add(ingredient)
+            }
+        }
 
-            val firstPlural = if (firstWord.endsWith("s")) firstWord else firstWord + "s"
-            val firstSingle = if (firstWord.endsWith("s")) firstWord.dropLast(1) else firstWord
+        // 4. Process the map to create the final, normalized list.
+        val finalIngredientSet = mutableSetOf<String>()
 
-            val completePlural = "$firstPlural ${restOfWords}".trim()
-            val completeSingular = "$firstSingle ${restOfWords}".trim()
+        baseIngredientMap.forEach { (singularKey, originalList) ->
 
-            val occurrences = ingredientsWithoutUnits.count {
-                it.equals(completePlural, ignoreCase = true) || it.equals(completeSingular, ignoreCase = true)
+            // Check if any of the original ingredients did NOT start with a number.
+            // This is the "salt" rule.
+            val hasNonUnitIngredient = originalList.any { !it.firstOrNull()?.isDigit()!! }
+
+            if (hasNonUnitIngredient) {
+                // Rule: If "salt" exists, we just want "salt", even if "1 pinch of salt" also exists.
+                finalIngredientSet.add(singularKey)
+            } else {
+                // Rule: All ingredients in this group had units (e.g., "1 egg", "2 eggs").
+                if (originalList.size > 1) {
+                    // More than one occurrence (e.g., "1 egg", "2 eggs")
+                    // Pluralize the key (e.g., "huevo" -> "huevos")
+                    finalIngredientSet.add(pluralizeBase(singularKey))
+                } else {
+                    // Only one occurrence (e.g., "125 g de mozzarella fresca")
+                    // Add the singular key (e.g., "mozzarella fresca")
+                    finalIngredientSet.add(singularKey)
+                }
+            }
+        }
+
+        // Return the final unique set as a mutable list.
+        return finalIngredientSet.toMutableList()
+    }
+
+    /**
+     * Extracts the base form of an ingredient and singularizes its first word.
+     * @param ingredient The raw ingredient string (e.g., "2 eggs").
+     * @param skippableWords A set of unit/preposition words to ignore.
+     * @return The singular base ingredient (e.g., "egg").
+     */
+    private fun getSingularBaseIngredient(ingredient: String, skippableWords: Set<String>): String {
+        val trimmed = ingredient.lowercase().trim()
+        if (trimmed.isEmpty()) return ""
+
+        val isUnitBased = trimmed.firstOrNull()?.isDigit() == true
+        val base: String
+
+        if (isUnitBased) {
+            // Ingredient starts with a number (e.g., "125 g mozzarella")
+            val words = trimmed.split(" ")
+
+            // Find the index of the first word that is NOT a number or a skippable word.
+            var i = 1 // Start at index 1 to skip the number
+            while (i < words.size && words[i].lowercase() in skippableWords) {
+                i++
             }
 
-            if (occurrences > 1 && !repeatedIngredientsWithUnits.contains(completePlural)) {
-                repeatedIngredientsWithUnits.add(completePlural)
-            }
-        }//Adds to a list the ingredients that appears more than one time an have units
+            // The rest of the words form the base ingredient
+            base = words.drop(i).joinToString(" ")
+        } else {
+            // Ingredient does not start with a number (e.g., "salt")
+            base = trimmed
+        }
 
-        //TODO: Ahora con toda esta lógica, hacer una lista que incluya los ingreddientes en plural, el resto de ingredientes,
-        // y aquellos que teniendo unidades no estaban repetidos
+        // Now, singularize the *first word* of the base ingredient
+        val baseWords = base.split(" ")
+        val firstWord = baseWords.firstOrNull() ?: return ""
 
-        return repeatedIngredientsWithUnits
+        val singularFirstWord = if (firstWord.endsWith("s")) {
+            firstWord.dropLast(1)
+        } else {
+            firstWord
+        }
+
+        return "$singularFirstWord ${baseWords.drop(1).joinToString(" ")}".trim()
+    }
+
+    /**
+     * Pluralizes the first word of a base ingredient string.
+     * @param singularBase The singular base ingredient (e.g., "egg").
+     * @return The pluralized base ingredient (e.g., "eggs").
+     */
+    private fun pluralizeBase(singularBase: String): String {
+        val words = singularBase.split(" ")
+        val firstWord = words.firstOrNull() ?: return singularBase
+
+        // Simple pluralization rule: add 's' if it's not already there.
+        val pluralFirstWord = if (firstWord.endsWith("s")) {
+            firstWord
+        } else {
+            firstWord + "s"
+        }
+
+        return "$pluralFirstWord ${words.drop(1).joinToString(" ")}".trim()
     }
 
     /**
