@@ -1,6 +1,7 @@
 package com.alejandro.recetas.controllers
 
-
+import android.content.Context
+import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.TypedValue
@@ -12,10 +13,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.alejandro.recetas.databinding.ActivityIngredientsBinding
 import com.alejandro.recetas.services.JsonService
-import android.content.Context
 
 class IngredientsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityIngredientsBinding
+    private val selectionMap: MutableMap<String, Boolean> = mutableMapOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,20 +24,52 @@ class IngredientsActivity : AppCompatActivity() {
         binding = ActivityIngredientsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val ingredients = normalizeIngredients(this)
+
+        // Populate the map with all ingredients, initially set to false.
+        ingredients.forEach { ingredientName ->
+            selectionMap[ingredientName] = false
+        }
+
+        // Show the checkboxes
+        showIngredients(ingredients)
+
         binding.btExit.setOnClickListener {
             finish()
         }
-        showIngredients()
+
+        binding.btProgress.setOnClickListener {
+            // Filter the map to get only the ingredients that are checked (value == true)
+            val selectedIngredients = selectionMap
+                .filter { it.value }
+                .keys
+                .toTypedArray() // Convert the resulting List<String> to Array<String>
+
+            val intent = Intent(this, ProgressActivity::class.java)
+
+            // Send ONLY the selected ingredients
+            intent.putExtra("selected_ingredients", selectedIngredients)
+            startActivity(intent)
+            finish()
+        }
     }
 
     /**
      * Show all ingredients. If some ingredient was repeated, it only shows in plural once.
      */
-    private fun showIngredients() {
+    private fun showIngredients(ingredients: MutableList<String>) {
         val container = binding.lyIngredients
         container.removeAllViews()
-        normalizeIngredients(this).forEach {
-            container.addView(createCheckBox(it))
+        ingredients.forEach { ingredientName ->
+            // Create the checkbox and add its listener
+            val checkBox = createCheckBox(ingredientName)
+
+            // Add a listener that updates our map when the state changes.
+            checkBox.setOnCheckedChangeListener { _, isChecked ->
+                selectionMap[ingredientName] = isChecked
+            }
+
+            container.addView(checkBox)
             addSeparatorView(container)
         }
     }
@@ -60,10 +93,7 @@ class IngredientsActivity : AppCompatActivity() {
             ?.map { it.lowercase().trim() }
             ?: emptyList()
 
-        // 2. Define words to skip when parsing ingredients with units.
-        //    We ONLY skip simple abbreviations (g, kg) and prepositions (de).
-        //    We DO NOT skip descriptive units (cup, clove, tbsp, cucharada)
-        //    as they are part of the ingredient base.
+
         val skippableWords = setOf(
             "g", "kg", "mg", "l", "ml", "oz", "lb", "lbs",
             "de", "of", "a"
@@ -86,21 +116,14 @@ class IngredientsActivity : AppCompatActivity() {
         baseIngredientMap.forEach { (singularKey, originalList) ->
 
             // Check if any of the original ingredients did NOT start with a number.
-            // This is the "salt" rule.
             val hasNonUnitIngredient = originalList.any { !it.firstOrNull()?.isDigit()!! }
 
             if (hasNonUnitIngredient) {
-                // Rule: If "salt" exists, we just want "salt", even if "1 pinch of salt" also exists.
                 finalIngredientSet.add(singularKey)
             } else {
-                // Rule: All ingredients in this group had units (e.g., "1 egg", "2 eggs").
                 if (originalList.size > 1) {
-                    // More than one occurrence (e.g., "1 egg", "2 eggs")
-                    // Pluralize the key (e.g., "huevo" -> "huevos")
                     finalIngredientSet.add(pluralizeBase(singularKey))
                 } else {
-                    // Only one occurrence (e.g., "125 g de mozzarella fresca")
-                    // Add the singular key (e.g., "mozzarella fresca")
                     finalIngredientSet.add(singularKey)
                 }
             }
@@ -124,7 +147,7 @@ class IngredientsActivity : AppCompatActivity() {
         val base: String
 
         if (isUnitBased) {
-            // Ingredient starts with a number (e.g., "125 g mozzarella")
+            // Ingredient starts with a number
             val words = trimmed.split(" ")
 
             // Find the index of the first word that is NOT a number or a skippable word.
@@ -136,7 +159,7 @@ class IngredientsActivity : AppCompatActivity() {
             // The rest of the words form the base ingredient
             base = words.drop(i).joinToString(" ")
         } else {
-            // Ingredient does not start with a number (e.g., "salt")
+            // Ingredient does not start with a number
             base = trimmed
         }
 
@@ -208,5 +231,4 @@ class IngredientsActivity : AppCompatActivity() {
         }
         container.addView(separator)
     }
-
 }
