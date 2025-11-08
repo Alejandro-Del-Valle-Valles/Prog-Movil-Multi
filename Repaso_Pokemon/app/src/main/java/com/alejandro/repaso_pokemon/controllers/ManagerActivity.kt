@@ -16,9 +16,6 @@ import com.alejandro.repaso_pokemon.model.Pokemon
 import com.alejandro.repaso_pokemon.repository.PokemonsRepository
 
 class ManagerActivity : AppCompatActivity() {
-
-    /*TODO: Implementar la característica para permitir
-       editar pokemons pulsando sobre ellos*/
     private lateinit var binding: ActivityManagerBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,6 +34,23 @@ class ManagerActivity : AppCompatActivity() {
         binding.btExit.setOnClickListener {
             finish()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshTable()
+    }
+
+    /**
+     * Refresh table content: remove previous rows (preserving first row if it's a header)
+     * and repopulate from repository.
+     */
+    private fun refreshTable() {
+        val total = binding.tbPokemons.childCount
+        if (total > 1) {
+            binding.tbPokemons.removeViews(1, total - 1)
+        } else if (total == 0) { }
+        showPokemons()
     }
 
     /**
@@ -65,6 +79,14 @@ class ManagerActivity : AppCompatActivity() {
         tableRow.addView(createTableCell(pokemon.strength.toString()))
         tableRow.addView(createTableCell(pokemon.defense.toString()))
         tableRow.addView(createTableCell(pokemon.health.toString()))
+
+        tableRow.setOnClickListener {
+            val intent = Intent(this, CreateAndModifyActivity::class.java).apply {
+                putExtra("IsEdited", true)
+                putExtra("PokemonId", pokemon.id)
+            }
+            startActivity(intent)
+        }
 
         binding.tbPokemons.addView(tableRow)
     }
