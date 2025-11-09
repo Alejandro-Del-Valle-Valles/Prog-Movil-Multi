@@ -71,6 +71,10 @@ class Pokemon(initialId: Int, initialName: String, var type: Types, initialLevel
         baseHealth = initialBaseHealth
     }
 
+    override fun toString(): String {
+        return name
+    }
+
     /** Two Pokemons are equal if they have the same reference or the same Id*/
     override fun equals(other: Any?): Boolean {
         if(this === other) return true

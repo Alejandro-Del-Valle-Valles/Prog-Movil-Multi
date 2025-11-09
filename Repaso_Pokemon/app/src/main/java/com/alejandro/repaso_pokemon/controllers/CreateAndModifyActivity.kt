@@ -134,7 +134,8 @@ class CreateAndModifyActivity : AppCompatActivity() {
         val pokemon = PokemonsRepository.getPokemons().firstOrNull { it.id == id }
 
         if (pokemon == null) {
-            Toast.makeText(this, "No se encontró el pokemon para editar", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "No se encontró el pokemon para editar",
+                Toast.LENGTH_SHORT).show()
             finish()
             return
         }
