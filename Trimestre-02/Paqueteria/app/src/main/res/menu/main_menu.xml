@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/SendPackage"
+        android:title="Enviar Paquete"/>
+    <item
+        android:id="@+id/SendMilCertificated"
+        android:title="Enviar Correo Postal Certificado"/>
+    <item
+        android:id="@+id/MailReception"
+        android:title="Recepción"/>
+</menu>
