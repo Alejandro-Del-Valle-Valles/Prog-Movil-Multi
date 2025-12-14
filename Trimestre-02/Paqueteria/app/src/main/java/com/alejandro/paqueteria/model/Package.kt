@@ -1,7 +1,7 @@
 package com.alejandro.paqueteria.model
 
 class Package(
-    sender: String, destination: String, val dimensions: IntArray,
+    sender: String, destination: String, val dimensions: Array<Float>,
     val weight: Float, insured: Boolean
 ) : Mail(sender, destination, insured) {
 
@@ -12,6 +12,8 @@ class Package(
         val MAX_WIDTH = 200
         val MAX_HEIGHT = 150
         val MAX_LONG = 300
+
+        val MAX_WEIGHT = 500
     }
 
     init {
@@ -27,8 +29,8 @@ class Package(
         require(dimensions[2] < MIN_LONG || dimensions[2] > MAX_LONG) {
             "El paquete no puede ser inferior a $MIN_LONG ni superior a $MAX_LONG de largo."
         }
-        require(weight < 0) {
-            "El paquete no puede tener peso negativo"
+        require(weight < 0 || weight >= MAX_WEIGHT) {
+            "El paquete no puede tener peso negativo ni pesar más de ${MAX_WEIGHT}Kg."
         }
     }
 
