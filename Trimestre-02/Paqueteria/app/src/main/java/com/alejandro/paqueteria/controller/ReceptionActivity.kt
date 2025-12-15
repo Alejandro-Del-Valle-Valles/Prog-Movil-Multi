@@ -29,7 +29,9 @@ class ReceptionActivity : AppCompatActivity() {
      * Show the info of the package if the user comes from a notification, else show the number of certified letters.
      */
     private fun showInfo() {
-        if(intent.getBooleanExtra("Notification", false)) {
+        //TODO: Cuando viene de notificacion, no entra por aqui, solo por el else
+        if(intent.getBooleanExtra("notification", false)) {
+            //TODO: Mostrar toda la info del paquete
             val sender = intent.getStringExtra("Sender")
             binding.tvInformation.setText("Se ha recibido un paquete de ${if(sender != "") sender else "Desconocido"}")
         } else {

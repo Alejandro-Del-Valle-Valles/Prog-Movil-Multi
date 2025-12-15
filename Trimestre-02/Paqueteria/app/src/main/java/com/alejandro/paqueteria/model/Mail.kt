@@ -5,10 +5,10 @@ abstract class Mail(
 ) {
 
     init {
-        require(sender.trim() == "") {
+        require(sender.trim() != "") {
             "El remitente no puede estar vacío."
         }
-        require(destination.trim() == "") {
+        require(destination.trim() != "") {
             "El destinatario no puede estar vacío."
         }
     }
