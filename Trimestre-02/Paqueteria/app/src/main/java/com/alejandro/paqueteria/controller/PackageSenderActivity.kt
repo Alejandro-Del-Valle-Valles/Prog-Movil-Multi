@@ -173,10 +173,7 @@ class PackageSenderActivity : AppCompatActivity() {
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
-            if (isGranted) {
-                // Permiso CONCEDIDO. Ya puedes enviar notificaciones.
-                // (Opcional: puedes llamar aquí a tu función de enviar notificación si quieres)
-            } else {
+            if (!isGranted) {
                 binding.tvCustomToastText.setText("No se tienen permisos para lanzar notificaciones. Concedelos.")
                 binding.cvCustomToast.visibility = View.VISIBLE
                 Handler(Looper.getMainLooper()).postDelayed({
@@ -234,12 +231,12 @@ class PackageSenderActivity : AppCompatActivity() {
         }
 
         val intent = Intent(this, ReceptionActivity::class.java).apply {
-            intent.putExtra("notification", true)
-            intent.putExtra("sender", binding.etSenderPackage.text.toString().trim())
-            intent.putExtra("destination",binding.etDestinationPackage.text.toString().trim())
-            intent.putExtra("size",parseSize().filterNotNull().toTypedArray())
-            intent.putExtra("weight",binding.etWeightPackage.text.toString().toFloat())
-            intent.putExtra("insured",binding.cbInsured.isChecked)
+            putExtra("notification", true)
+            putExtra("sender", binding.etSenderPackage.text.toString().trim())
+            putExtra("destination",binding.etDestinationPackage.text.toString().trim())
+            putExtra("size",parseSize().filterNotNull().toTypedArray().toFloatArray())
+            putExtra("weight",binding.etWeightPackage.text.toString().toFloat())
+            putExtra("insured",binding.cbInsured.isChecked)
         }
 
         val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
