@@ -94,10 +94,10 @@ class ListVaritaActivity : AppCompatActivity() {
     private fun showToast(text: String?) {
         if(!text.isNullOrBlank()) {
             binding.tvErrorLoadingText.setText("Ha ocurrido un error: " + text)
-            binding.tvErrorLoadingText.visibility = View.VISIBLE
+            binding.cvErrorLoading.visibility = View.VISIBLE
 
             Handler(Looper.getMainLooper()).postDelayed({
-                binding.tvErrorLoadingText.visibility = View.GONE
+                binding.cvErrorLoading.visibility = View.GONE
             }, 3000)
         }
     }
