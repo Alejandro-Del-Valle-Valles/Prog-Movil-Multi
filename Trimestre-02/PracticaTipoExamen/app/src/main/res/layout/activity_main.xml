@@ -56,7 +56,7 @@
         app:layout_constraintVertical_bias="0.033">
 
         <LinearLayout
-            android:id="@+id/contenedorCartas"
+            android:id="@+id/llContenedorCartas"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" />
