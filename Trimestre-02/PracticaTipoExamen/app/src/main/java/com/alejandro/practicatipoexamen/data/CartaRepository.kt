@@ -2,7 +2,7 @@ package com.alejandro.practicatipoexamen.data
 
 import androidx.lifecycle.LiveData
 
-class TareaRepository(private val daoCarta: DaoCarta) {
+class CartaRepository(private val daoCarta: DaoCarta) {
     val cartas: LiveData<List<Carta>> = daoCarta.getCartas()
 
     suspend fun inserta(carta: Carta) {

@@ -16,8 +16,10 @@ import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -27,10 +29,13 @@ import com.alejandro.practicatipoexamen.R
 import com.alejandro.practicatipoexamen.databinding.ActivityMainBinding
 import com.alejandro.practicatipoexamen.helper.ConfirmDialog
 import androidx.core.view.isNotEmpty
+import com.alejandro.practicatipoexamen.data.Carta
+import com.alejandro.practicatipoexamen.viewmodel.CartaViewModel
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private val vistaModelo: CartaViewModel by viewModels()
     val CHANNEL_ID = "mi_canal"
     var CONTADOR_CARTAS = 1
 
@@ -144,6 +149,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        guardarCartas() //Guardamos las cartas
         val intent = Intent(this, CartasActivity::class.java)
 
         val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
@@ -175,6 +181,26 @@ class MainActivity : AppCompatActivity() {
             if(hijo is EditText && hijo.text.isEmpty()) return false //Cuando falta contenido automaticamente sale
         }
         return true
+    }
+
+    private fun guardarCartas() {
+        for(i in 0 until binding.llContenedorCartas.childCount step 4) {
+            try {
+                val remitente = binding.llContenedorCartas.getChildAt(i + 1) as? EditText
+                val contenido = binding.llContenedorCartas.getChildAt(i + 2) as? EditText
+                val destinatario = binding.llContenedorCartas.getChildAt(i + 3) as? EditText
+                if(remitente != null && contenido != null && destinatario != null) {
+                    val carta = Carta(
+                        remitente = remitente.text.toString(),
+                        contenido = contenido.text.toString(),
+                        destinatario = destinatario.text.toString())
+                    vistaModelo.insert(carta)
+                }
+            } catch (ex: Exception) {
+                Toast.makeText(this, "Error al guardar las cartas.", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
     }
 
 
