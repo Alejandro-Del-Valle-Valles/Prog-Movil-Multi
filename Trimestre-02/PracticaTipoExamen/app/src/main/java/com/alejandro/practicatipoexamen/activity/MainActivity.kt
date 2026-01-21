@@ -8,6 +8,7 @@ import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -137,8 +138,6 @@ class MainActivity : AppCompatActivity() {
             binding.svCartas.fullScroll(LinearLayout.FOCUS_DOWN)
         }
     }
-
-    //TODO: Añadir lógica de almacenamiento de cartas en una BBDD
     private fun enviarCartas() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -173,6 +172,11 @@ class MainActivity : AppCompatActivity() {
             val notificationId = 1
             notify(notificationId, builder.build())
         }
+
+        //Reproducción de audio
+        val player = MediaPlayer.create(this, R.raw.audio_examen)
+        player.start()
+        player.setOnCompletionListener { player.release() }
     }
 
     private fun comprobarDatosCartas(): Boolean {
