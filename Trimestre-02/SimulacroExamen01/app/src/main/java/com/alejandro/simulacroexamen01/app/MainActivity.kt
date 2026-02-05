@@ -20,7 +20,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import com.alejandro.simulacroexamen01.R
-import com.alejandro.simulacroexamen01.TipoTropas
+import com.alejandro.simulacroexamen01.enums.TipoTropas
 import com.alejandro.simulacroexamen01.data.Tropa
 import com.alejandro.simulacroexamen01.databinding.ActivityMainBinding
 import com.alejandro.simulacroexamen01.helper.ConfirmDialog

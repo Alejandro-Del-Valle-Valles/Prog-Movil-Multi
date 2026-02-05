@@ -12,7 +12,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.isDigitsOnly
 import com.alejandro.simulacroexamen01.R
-import com.alejandro.simulacroexamen01.TipoTropas
+import com.alejandro.simulacroexamen01.enums.TipoTropas
 import com.alejandro.simulacroexamen01.data.Tropa
 import com.alejandro.simulacroexamen01.databinding.ActivityRegistroBinding
 

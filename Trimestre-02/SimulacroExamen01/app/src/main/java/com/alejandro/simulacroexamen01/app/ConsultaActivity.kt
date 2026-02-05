@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.alejandro.simulacroexamen01.TipoTropas
+import com.alejandro.simulacroexamen01.enums.TipoTropas
 import com.alejandro.simulacroexamen01.data.Tropa
 import com.alejandro.simulacroexamen01.databinding.ActivityConsultaBinding
 import kotlin.random.Random
