@@ -1,5 +1,6 @@
 package com.alejandro.videojuego.activity
 
+import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +16,10 @@ class LoseActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = ActivityLoseBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val player = MediaPlayer.create(this, R.raw.lose_effect)
+        player.start()
+        player.setOnCompletionListener { player.release() }
 
         binding.btExit.setOnClickListener {
             finish()
