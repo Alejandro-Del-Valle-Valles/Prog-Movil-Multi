@@ -38,28 +38,43 @@ class GameView(context: Context, val difficulty: DifficultyTypes): SurfaceView(c
     private var speedY = 15f
     private var points = 0
 
+    //Max time to touch the square
+    private var maxTime = 5f //First try of each difficulty will have 5 seconds
+    private var timeRemaining = maxTime
+
     //Limits of the screen
     private var screenWidth = 0
     private var screenHeight = 0
+    private val topUIHeight = 75f //Space top reserved for information (Lives, time, points)
 
     init {
         //Personalized font for the texts
         val customFont = ResourcesCompat.getFont(context, R.font.game_font)
         paint.typeface = customFont ?: Typeface.DEFAULT
+        paint.textSize = 60f
     }
 
+    /**
+     * Set the limits of the screen if the screen size is changed
+     */
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         screenWidth = w
         screenHeight = h
     }
 
+    /**
+     * Resume the game when it's on the screen
+     */
     fun resume() {
         playing = true
         gameThread = Thread(this)
         gameThread?.start()
     }
 
+    /**
+     * Pause the game when it isn't on the screen
+     */
     fun pause() {
         playing = false
         try {
@@ -76,12 +91,25 @@ class GameView(context: Context, val difficulty: DifficultyTypes): SurfaceView(c
     override fun run() {
         when(difficulty) {
             DifficultyTypes.NORMAL -> squareSize = 175f
-            DifficultyTypes.DIFICIL -> squareSize = 100f
-            DifficultyTypes.IMPOSIBLE -> squareSize = 50f
-            else -> {/*Nada*/}
+            DifficultyTypes.DIFICIL -> {
+                squareSize = 100f
+                maxTime = 3f
+            }
+            DifficultyTypes.IMPOSIBLE -> {
+                squareSize = 50f
+                maxTime = 3f
+            }
+            else -> {}
         }
+        var lastFrameTime = System.currentTimeMillis()
+
         while (playing) {
-            update()
+            //Calculate the time of the actual frame
+            val currentTime = System.currentTimeMillis()
+            val newTime = (currentTime - lastFrameTime) / 1000f
+            lastFrameTime = currentTime
+
+            update(newTime)
             draw()
             control()
         }
@@ -91,31 +119,39 @@ class GameView(context: Context, val difficulty: DifficultyTypes): SurfaceView(c
      * Update the speed of the squre if the selected difficluty is "Imposible"
      * and recalculate the remaining time.
      */
-    private fun update() {
+    private fun update(newTime: Float) {
+        timeRemaining -= newTime
         if(difficulty == DifficultyTypes.IMPOSIBLE) {
             squareX += speedX
             squareY += speedY
 
-            if(squareX > width || squareX < 0)
+            if(squareX + squareSize > width || squareX < 0)
                 speedX = -speedX
 
-            if (squareY > height || squareY < 0)
+            if (squareY + squareSize > height || squareY < topUIHeight)
                 speedY = -speedY
         }
-        //TODO: Añadir el cálculo de tiempo y puntaje
+        if(timeRemaining <= 0f) {
+            respawnSquare()
+            numLives--
+            timeRemaining = maxTime
+        }
+        if(numLives <= 0) gameOver()
+
     }
 
     /**
-     * Darw all the assets of the game on
+     * Draw all the assets of the game on
      */
     private fun draw() {
         if (surfaceHolder.surface.isValid) {
             val canvas: Canvas = surfaceHolder.lockCanvas()
             canvas.drawColor(Color.BLACK)
             paint.color = Color.WHITE
-            paint.textSize = 60f
-            canvas.drawText("Vidas: $numLives", 50f, 100f, paint)
-            paint.color = squareColor //TODO: Cambiar esto a cuando se genere un nuevo cuadrado
+            canvas.drawText("Vidas: $numLives", 25f, 100f, paint)
+            canvas.drawText("Tiempo: ${"%.2f".format(timeRemaining)}", 275f, 100f, paint)
+            canvas.drawText("Puntos: $points", 650f, 100f, paint)
+            paint.color = squareColor
 
             canvas.drawRect(squareX, squareY, squareX + squareSize, squareY + squareSize, paint)
 
@@ -135,10 +171,10 @@ class GameView(context: Context, val difficulty: DifficultyTypes): SurfaceView(c
     }
 
     /**
-     * Gestiona los toques en la pantalla
+     * Check when the player touch the square. If the player touch the square, play a sound effect
+     * adds points and call the function tha generates a new square.
      */
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        //TODO: Añadir suma de puntaje en base al tiempo que ha tardado en pulsar sobre el cuadrado
         if (event.action == MotionEvent.ACTION_DOWN) {
             val touchX = event.x
             val touchY = event.y
@@ -149,14 +185,29 @@ class GameView(context: Context, val difficulty: DifficultyTypes): SurfaceView(c
                 player.start()
                 player.setOnCompletionListener { player.release() }
                 respawnSquare()
+                calculatePoints()
             } else {
                 numLives--
                 if (numLives <= 0) {
                     gameOver()
                 }
             }
+            timeRemaining = maxTime
         }
         return true
+    }
+
+    /**
+     * Calculate the points to give in base of the time remaining
+     */
+    private fun calculatePoints() {
+        points += when {
+            timeRemaining >= 4f -> 1000
+            timeRemaining >= 3f -> 500
+            timeRemaining >= 2f -> 250
+            timeRemaining >= 1f -> 100
+            else -> 50
+        }
     }
 
     /**
@@ -165,7 +216,8 @@ class GameView(context: Context, val difficulty: DifficultyTypes): SurfaceView(c
     private fun respawnSquare() {
         if (screenWidth > 0 && screenHeight > 0) {
             squareX = Random.nextFloat() * (screenWidth - squareSize)
-            squareY = Random.nextFloat() * (screenHeight - squareSize)
+            val verticalRange = screenHeight - topUIHeight - squareSize
+            squareY = (Random.nextFloat() * verticalRange) + topUIHeight
             squareColor = squareColors.random()
         }
     }
@@ -176,8 +228,7 @@ class GameView(context: Context, val difficulty: DifficultyTypes): SurfaceView(c
     private fun gameOver() {
         playing = false
         val intent = Intent(context, LoseActivity::class.java)
-        //Esto evita que se pueda volver al juego con la flecha de "atrás"
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        intent.putExtra("POINTS", points)
         context.startActivity(intent)
 
         if (context is Activity) {

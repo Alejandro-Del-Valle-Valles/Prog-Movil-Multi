@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.alejandro.videojuego.databinding.ActivityMainBinding
 import com.alejandro.videojuego.enums.DifficultyTypes
 import com.alejandro.videojuego.R.raw //Para que no falle
+import com.alejandro.videojuego.R.layout
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,10 +25,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         adapter = ArrayAdapter(
             this,
-            R.layout.simple_spinner_item,
+            layout.spinner_item_custom, //Personalized spinner
             DifficultyTypes.entries.map { it.name }
         )
-        adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
+        adapter.setDropDownViewResource(layout.spinner_dropdown_custom) //Personalized spinner
         binding.spDificulty.adapter = adapter
         playMusic()
 
@@ -47,14 +48,21 @@ class MainActivity : AppCompatActivity() {
         player?.setOnCompletionListener { playMusic() }
     }
 
+    /**
+     * Start the music again
+     */
     override fun onResume() {
         super.onResume()
         playMusic()
     }
 
+    /**
+     * Stop, release and clear the player of the music
+     */
     override fun onPause() {
         super.onPause()
         player?.stop()
         player?.release()
+        player = null
     }
 }
