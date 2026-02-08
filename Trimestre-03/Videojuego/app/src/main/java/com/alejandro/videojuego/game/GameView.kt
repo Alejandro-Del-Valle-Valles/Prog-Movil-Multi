@@ -204,9 +204,18 @@ class GameView(context: Context, val difficulty: DifficultyTypes): SurfaceView(c
         points += when {
             timeRemaining >= 4f -> 1000
             timeRemaining >= 3f -> 500
-            timeRemaining >= 2f -> 250
-            timeRemaining >= 1f -> 100
-            else -> 50
+            timeRemaining >= 2f -> {
+                if (difficulty == DifficultyTypes.DIFICIL || difficulty == DifficultyTypes.IMPOSIBLE) 1000
+                else 250
+            }
+            timeRemaining >= 1f -> {
+                if (difficulty == DifficultyTypes.DIFICIL || difficulty == DifficultyTypes.IMPOSIBLE) 500
+                else 100
+            }
+            else -> {
+                if (difficulty == DifficultyTypes.DIFICIL || difficulty == DifficultyTypes.IMPOSIBLE) 250
+                else 50
+            }
         }
     }
 
