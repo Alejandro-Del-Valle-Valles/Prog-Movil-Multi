@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/text1"
+    style="?android:attr/spinnerDropDownItemStyle"
+    android:layout_width="match_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:fontFamily="@font/game_font"
+    android:textSize="18sp"
+    android:textColor="#000000"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:gravity="center_vertical"
+    android:ellipsize="marquee" />
+
+<!-- Este elemento lo he generado con IA. Sirve para mostrar el spinner con la fuente personalizada -->
