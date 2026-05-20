@@ -5,16 +5,15 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.alejandro.notas.model.Category
 
 @Dao
 interface DaoCategory {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun createCategory(category: String): String
+    suspend fun createCategory(category: Category): Long
 
-    @Update(onConflict = OnConflictStrategy.IGNORE)
+    @Query("UPDATE categorias SET name = :newCategory WHERE name = :oldCategory")
     suspend fun updateCategory(oldCategory: String, newCategory: String): Int
 
     @Query("SELECT * FROM categorias")

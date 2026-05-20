@@ -2,21 +2,19 @@ package com.alejandro.notas.helpers
 
 import androidx.room.TypeConverter
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 /**
  * Converters for Room to handle non-primitive data types.
  */
 class Converters {
-    private val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
     @TypeConverter
     fun fromTimestamp(value: String?): LocalDateTime? {
-        return value?.let { LocalDateTime.parse(it, formatter) }
+        return value?.let { LocalDateTime.parse(it) }
     }
 
     @TypeConverter
     fun dateToTimestamp(date: LocalDateTime?): String? {
-        return date?.format(formatter)
+        return date?.toString()
     }
 }

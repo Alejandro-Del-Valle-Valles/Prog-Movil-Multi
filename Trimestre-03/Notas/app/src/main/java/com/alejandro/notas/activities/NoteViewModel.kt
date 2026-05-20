@@ -53,5 +53,5 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * Get all notes as LiveData to observe changes in the UI.
      */
-    fun getAllNotesLiveData() = DataBaseApp.getDataBase(getApplication()).daoNote().getAllNotes()
+    fun getAllNotesLiveData() = DataBaseApp.getDataBase(getApplication()).daoNote().getNotesWithCategories()
 }

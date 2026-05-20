@@ -14,7 +14,7 @@ class CategoryViewModel(application: Application) : AndroidViewModel(application
     val allCategories = mutableListOf<String>()
 
     init {
-        val categoryDao = com.alejandro.notas.data.DataBaseApp.getDataBase(application).daoCategory()
+        val categoryDao = DataBaseApp.getDataBase(application).daoCategory()
         repository = CategoryRepository(categoryDao)
     }
 

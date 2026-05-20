@@ -10,6 +10,5 @@ data class Note(
     val title: String,
     val content: String?,
     val color: String = "#FFC369",
-    val categories: List<Category> = emptyList(),
     val editedAt: LocalDateTime = LocalDateTime.now()
 )

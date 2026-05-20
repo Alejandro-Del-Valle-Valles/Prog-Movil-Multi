@@ -7,7 +7,7 @@ import com.alejandro.notas.model.Note
 class NoteRepository(private val daoNote: DaoNote) {
     val allNotes: LiveData<List<Note>> = daoNote.getAllNotes()
 
-    suspend fun insert(note: Note): Int {
+    suspend fun insert(note: Note): Long {
         return daoNote.createNote(note)
     }
 

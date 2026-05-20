@@ -4,12 +4,21 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverter
+import androidx.room.TypeConverters
 import com.alejandro.notas.data.dao.DaoCategory
 import com.alejandro.notas.data.dao.DaoNote
+import com.alejandro.notas.helpers.Converters
 import com.alejandro.notas.model.Category
 import com.alejandro.notas.model.Note
+import com.alejandro.notas.model.NoteCategoryCrossRef
 
-@Database(entities = [Note::class, Category::class], version = 1, exportSchema = true)
+@Database(
+    entities = [Note::class, Category::class, NoteCategoryCrossRef::class],
+    version = 1,
+    exportSchema = true
+)
+@TypeConverters(Converters::class)
 abstract class DataBaseApp : RoomDatabase() {
 
     abstract fun daoNote(): DaoNote
