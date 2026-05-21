@@ -1,12 +1,19 @@
 package com.alejandro.notas.activities
 
 import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.alejandro.notas.R
 import com.alejandro.notas.databinding.ActivityMainBinding
 import com.alejandro.notas.helpers.NoteAdapter
+import com.alejandro.notas.model.Note
+import com.alejandro.notas.model.NoteWithCategories
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,18 +34,69 @@ class MainActivity : AppCompatActivity() {
             noteAdapter.updateNotes(list)
         }
 
+        categoryViewModel.getAllCategoriesLiveData().observe(this) { list ->
+            //TODO Actualizar categorías en el spinner
+        }
+
         binding.btAdd.setOnClickListener {
-            //TODO Añadir nota
+            showNoteDialog(null)
+        }
+
+        binding.etSearchBar.addTextChangedListener { text ->
+            notesViewModel.getAllNotesLiveData().observe(this) { list ->
+                val filteredList = list.filter { it.note.title.contains(text.toString(), ignoreCase = true) }
+                noteAdapter.updateNotes(filteredList)
+            }
         }
     }
 
     private fun setupRecyclerView() {
         noteAdapter = NoteAdapter { item ->
-            //TODO Abrir la nota pulsada
+            showNoteDialog(item)
         }
+
         binding.rvNotes.apply {
             adapter = noteAdapter
             layoutManager = LinearLayoutManager(this@MainActivity)
         }
+    }
+
+    /**
+     * Displays an AlertDialog to create or edit a note.
+     * @param noteToEdit The note to edit, or null if creating a new one.
+     */
+    private fun showNoteDialog(noteToEdit: NoteWithCategories?) { // Change to NoteWithCategories if needed
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_note, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        val etTitle = dialogView.findViewById<EditText>(R.id.etDialogTitle)
+        val etContent = dialogView.findViewById<EditText>(R.id.etDialogContent)
+        val btnSave = dialogView.findViewById<Button>(R.id.btnSave)
+
+        var selectedColor = "#FFFFFF"
+
+        if (noteToEdit != null) {
+            etTitle.setText(noteToEdit.note.title)
+            etContent.setText(noteToEdit.note.content)
+            selectedColor = noteToEdit.note.color
+        }
+
+        btnSave.setOnClickListener {
+            val title = etTitle.text.toString()
+            val content = etContent.text.toString()
+
+            if (noteToEdit == null) {
+                val newNote = Note(title = title, content = content, color = selectedColor)
+                notesViewModel.insert(newNote)
+            } else {
+                val updatedNote = noteToEdit.copy(Note(title = title, content = content, color = selectedColor))
+                notesViewModel.update(updatedNote.note)
+            }
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 }
