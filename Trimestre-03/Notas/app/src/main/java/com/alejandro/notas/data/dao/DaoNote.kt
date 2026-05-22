@@ -29,6 +29,9 @@ interface DaoNote {
     @Query("DELETE FROM notas WHERE id = :id")
     suspend fun deleteNoteById(id: Int): Int
 
+    @Query("DELETE FROM note_category_cross_ref WHERE id = :noteId")
+    suspend fun deleteCategoriesForNote(noteId: Int)
+
     @Transaction
     @Query("SELECT * FROM notas ORDER BY editedAt DESC")
     fun getNotesWithCategories(): LiveData<List<NoteWithCategories>>
@@ -40,6 +43,6 @@ interface DaoNote {
     /**
      * Inserts the relationship between a note and a category.
      */
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNoteCategoryCrossRef(crossRef: NoteCategoryCrossRef)
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.alejandro.notas.data.DataBaseApp
 import com.alejandro.notas.data.repository.NoteRepository
+import com.alejandro.notas.model.Category
 import com.alejandro.notas.model.Note
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,6 +49,20 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun delete(id: Int) = viewModelScope.launch(Dispatchers.IO) {
         repository.delete(id)
+    }
+
+    /**
+     * Insert a note with his categories
+     */
+    fun insertWithCategories(note: Note, categories: List<Category>) = viewModelScope.launch(Dispatchers.IO) {
+        repository.insertWithCategories(note, categories)
+    }
+
+    /**
+     * Update the note and his categories
+     */
+    fun updateWithCategories(note: Note, categories: List<Category>) = viewModelScope.launch(Dispatchers.IO) {
+        repository.updateWithCategories(note, categories)
     }
 
     /**

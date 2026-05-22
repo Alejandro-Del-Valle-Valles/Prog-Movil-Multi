@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() {
                     content = content,
                     color = selectedNoteColor
                 )
-                notesViewModel.insert(newNote)
+                notesViewModel.insertWithCategories(newNote, currentCategories)
             } else {
                 // Es una actualización
                 val updatedNote = noteToEdit.note.copy(
@@ -195,7 +195,7 @@ class MainActivity : AppCompatActivity() {
                     color = selectedNoteColor,
                     editedAt = java.time.LocalDateTime.now()
                 )
-                notesViewModel.update(updatedNote)
+                notesViewModel.updateWithCategories(updatedNote, currentCategories)
             }
             dialog.dismiss()
         }
