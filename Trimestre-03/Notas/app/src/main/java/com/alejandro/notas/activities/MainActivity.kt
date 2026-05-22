@@ -19,6 +19,7 @@ import com.alejandro.notas.databinding.ActivityMainBinding
 import com.alejandro.notas.helpers.ColorAdapter
 import com.alejandro.notas.helpers.NoteAdapter
 import com.alejandro.notas.model.Category
+import com.alejandro.notas.model.Note
 import com.alejandro.notas.model.NoteWithCategories
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -176,6 +177,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnSave.setOnClickListener {
+            val title = etTitle.text.toString()
+            val content = etContent.text.toString()
+
+            if (noteToEdit == null) {
+                val newNote = Note(
+                    title = title,
+                    content = content,
+                    color = selectedNoteColor
+                )
+                notesViewModel.insert(newNote)
+            } else {
+                // Es una actualización
+                val updatedNote = noteToEdit.note.copy(
+                    title = title,
+                    content = content,
+                    color = selectedNoteColor,
+                    editedAt = java.time.LocalDateTime.now()
+                )
+                notesViewModel.update(updatedNote)
+            }
             dialog.dismiss()
         }
 
