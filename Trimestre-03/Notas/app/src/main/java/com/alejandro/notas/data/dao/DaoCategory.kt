@@ -13,8 +13,8 @@ interface DaoCategory {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun createCategory(category: Category): Long
 
-    @Query("UPDATE categorias SET name = :newCategory WHERE name = :oldCategory")
-    suspend fun updateCategory(oldCategory: String, newCategory: String): Int
+    @Query("UPDATE categorias SET name = :newCategoryName, color = :newCategoryColor WHERE name = :oldCategory")
+    suspend fun updateCategory(oldCategory: String, newCategoryName: String, newCategoryColor: String): Int
 
     @Query("SELECT * FROM categorias")
     fun getAllCategories(): LiveData<List<Category>>

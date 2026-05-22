@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.alejandro.notas.data.DataBaseApp
 import com.alejandro.notas.data.repository.CategoryRepository
+import com.alejandro.notas.model.Category
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -18,11 +19,11 @@ class CategoryViewModel(application: Application) : AndroidViewModel(application
         repository = CategoryRepository(categoryDao)
     }
 
-    fun insert(category: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun insert(category: Category) = viewModelScope.launch(Dispatchers.IO) {
         repository.insert(category)
     }
 
-    fun update(oldCategory: String, newCategory: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun update(oldCategory: Category, newCategory: Category) = viewModelScope.launch(Dispatchers.IO) {
         repository.update(oldCategory, newCategory)
     }
 

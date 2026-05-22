@@ -1,21 +1,27 @@
 package com.alejandro.notas.activities
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.PopupMenu // Added for the filter menu
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.alejandro.notas.R
 import com.alejandro.notas.databinding.ActivityMainBinding
+import com.alejandro.notas.helpers.ColorAdapter
 import com.alejandro.notas.helpers.NoteAdapter
-import com.alejandro.notas.model.Category // Make sure this is imported
-import com.alejandro.notas.model.Note
+import com.alejandro.notas.model.Category
 import com.alejandro.notas.model.NoteWithCategories
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,6 +31,12 @@ class MainActivity : AppCompatActivity() {
     private var allNotesList: List<NoteWithCategories> = emptyList()
     private var availableCategories: List<Category> = emptyList()
     private lateinit var noteAdapter: NoteAdapter
+
+    //Naranja, Rojo, Morado, Azul, Amarillo, Rosa, Verde
+    private val colorPalette = listOf(
+        "#FF9800", "#F44336", "#9C27B0", "#2196F3",
+        "#FFEB3B", "#E91E63", "#4CAF50"
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,35 +110,103 @@ class MainActivity : AppCompatActivity() {
      */
     private fun showNoteDialog(noteToEdit: NoteWithCategories?) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_note, null)
-        val dialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .create()
+        val dialog = AlertDialog.Builder(this).setView(dialogView).create()
 
         val etTitle = dialogView.findViewById<EditText>(R.id.etDialogTitle)
         val etContent = dialogView.findViewById<EditText>(R.id.etDialogContent)
+        val ibMenu = dialogView.findViewById<ImageButton>(R.id.ibMenu)
+        val cgCategories = dialogView.findViewById<ChipGroup>(R.id.cgDialogCategories)
+        val rvColorPicker = dialogView.findViewById<RecyclerView>(R.id.rvColorPicker)
         val btnSave = dialogView.findViewById<Button>(R.id.btnSave)
 
-        var selectedColor = "#FFFFFF"
+        var selectedNoteColor = "#FFFFFF"
+        val currentCategories = noteToEdit?.categories?.toMutableList() ?: mutableListOf()
+
+        /**
+         * Refreshes the ChipGroup UI based on currentCategories.
+         */
+        fun updateChips() {
+            cgCategories.removeAllViews()
+            currentCategories.forEach { category ->
+                val chip = Chip(this).apply {
+                    text = category.name
+                    chipBackgroundColor = ColorStateList.valueOf(Color.parseColor(category.color))
+                    setTextColor(Color.WHITE)
+                    setOnClickListener {
+                        currentCategories.remove(category)
+                        updateChips()
+                    }
+                }
+                cgCategories.addView(chip)
+            }
+        }
 
         if (noteToEdit != null) {
             etTitle.setText(noteToEdit.note.title)
             etContent.setText(noteToEdit.note.content)
-            selectedColor = noteToEdit.note.color
+            selectedNoteColor = noteToEdit.note.color
+        }
+        updateChips()
+
+        rvColorPicker.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvColorPicker.adapter = ColorAdapter(colorPalette) { color ->
+            selectedNoteColor = color
+            dialogView.setBackgroundColor(Color.parseColor(color))
+        }
+
+        ibMenu.setOnClickListener { view ->
+            val popup = PopupMenu(this, view)
+            popup.menu.add("Añadir etiqueta")
+            if (noteToEdit != null) popup.menu.add("Eliminar nota")
+
+            popup.setOnMenuItemClickListener { item ->
+                when (item.title) {
+                    "Eliminar nota" -> {
+                        notesViewModel.delete(noteToEdit!!.note.id)
+                        dialog.dismiss()
+                    }
+                    "Añadir etiqueta" -> showAddCategoryDialog { newCategory ->
+                        currentCategories.add(newCategory)
+                        updateChips()
+                    }
+                }
+                true
+            }
+            popup.show()
         }
 
         btnSave.setOnClickListener {
-            val title = etTitle.text.toString()
-            val content = etContent.text.toString()
-
-            if (noteToEdit == null) {
-                val newNote = Note(title = title, content = content, color = selectedColor)
-                notesViewModel.insert(newNote)
-            } else {
-                val updatedNote = noteToEdit.note.copy(title = title, content = content, color = selectedColor)
-                notesViewModel.update(updatedNote)
-            }
             dialog.dismiss()
         }
+
+        dialog.show()
+    }
+
+    private fun showAddCategoryDialog(onCategoryAdded: (Category) -> Unit) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_category, null)
+        val dialog = AlertDialog.Builder(this).setView(dialogView).create()
+
+        val etName = dialogView.findViewById<EditText>(R.id.etCategoryName)
+        val rvColors = dialogView.findViewById<RecyclerView>(R.id.rvCategoryColorPicker)
+        val btnAdd = dialogView.findViewById<Button>(R.id.btnAddCategory)
+
+        var selectedCategoryColor = "#4CAF50" // Default Green
+
+        rvColors.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvColors.adapter = ColorAdapter(colorPalette) { color ->
+            selectedCategoryColor = color
+        }
+
+        btnAdd.setOnClickListener {
+            val name = etName.text.toString().trim()
+            if (name.isNotEmpty()) {
+                val newCat = Category(name = name, color = selectedCategoryColor)
+                categoryViewModel.insert(newCat)
+                onCategoryAdded(newCat)
+                dialog.dismiss()
+            }
+        }
+
         dialog.show()
     }
 }

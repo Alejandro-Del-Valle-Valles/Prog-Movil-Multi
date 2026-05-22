@@ -30,6 +30,13 @@
             android:contentDescription="Options" />
     </RelativeLayout>
 
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/cgDialogCategories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:chipSpacing="4dp"/>
+
     <EditText
         android:id="@+id/etDialogContent"
         android:layout_width="match_parent"
@@ -44,7 +51,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Selecciona un color:"
+        android:text="Elige un color:"
         android:textStyle="bold"/>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -52,13 +59,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:orientation="horizontal"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+        android:orientation="horizontal"/>
 
     <Button
         android:id="@+id/btnSave"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Guardar Cambios"/>
+        android:text="Guardar cambios"/>
 </LinearLayout>

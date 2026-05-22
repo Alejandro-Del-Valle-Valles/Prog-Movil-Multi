@@ -7,12 +7,12 @@ import com.alejandro.notas.model.Category
 class CategoryRepository(private val daoCategory: DaoCategory) {
     val allCategories: LiveData<List<Category>> = daoCategory.getAllCategories()
 
-    suspend fun insert(category: String): Long {
-        return daoCategory.createCategory(Category(category))
+    suspend fun insert(category: Category): Long {
+        return daoCategory.createCategory(category)
     }
 
-    suspend fun update(oldCategory: String, newCategory: String): Int {
-        return daoCategory.updateCategory(oldCategory, newCategory)
+    suspend fun update(oldCategory: Category, newCategory: Category): Int {
+        return daoCategory.updateCategory(oldCategory.name, newCategory.name, newCategory.color)
     }
 
     suspend fun delete(category: String): Int {
