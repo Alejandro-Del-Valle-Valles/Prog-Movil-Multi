@@ -33,10 +33,10 @@ class MainActivity : AppCompatActivity() {
     private var availableCategories: List<Category> = emptyList()
     private lateinit var noteAdapter: NoteAdapter
 
-    //Naranja, Rojo, Morado, Azul, Amarillo, Rosa, Verde
+    //Blanco, Naranja, Rojo, Morado, Azul, Amarillo, Rosa, Verde
     private val colorPalette = listOf(
-        "#FF9800", "#F44336", "#9C27B0", "#2196F3",
-        "#FFEB3B", "#E91E63", "#4CAF50"
+        "#FFFFFF", "#FF9800", "#F44336", "#9C27B0",
+        "#2196F3", "#FFEB3B", "#E91E63", "#4CAF50"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -124,6 +124,7 @@ class MainActivity : AppCompatActivity() {
         val currentCategories = noteToEdit?.categories?.toMutableList() ?: mutableListOf()
 
         /**
+         * Inner function. This part was made with AI
          * Refreshes the ChipGroup UI based on currentCategories.
          */
         fun updateChips() {
@@ -146,6 +147,7 @@ class MainActivity : AppCompatActivity() {
             etTitle.setText(noteToEdit.note.title)
             etContent.setText(noteToEdit.note.content)
             selectedNoteColor = noteToEdit.note.color
+            dialogView.setBackgroundColor(Color.parseColor(selectedNoteColor))
         }
         updateChips()
 
@@ -188,7 +190,6 @@ class MainActivity : AppCompatActivity() {
                 )
                 notesViewModel.insertWithCategories(newNote, currentCategories)
             } else {
-                // Es una actualización
                 val updatedNote = noteToEdit.note.copy(
                     title = title,
                     content = content,
