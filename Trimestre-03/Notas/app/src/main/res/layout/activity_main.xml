@@ -23,8 +23,8 @@
 
     <EditText
         android:id="@+id/etSearchBar"
-        android:layout_width="387dp"
-        android:layout_height="52dp"
+        android:layout_width="326dp"
+        android:layout_height="53dp"
         android:background="@drawable/bg_search_bar"
         android:ems="10"
         android:hint="Buscar por título"
@@ -33,10 +33,21 @@
         android:paddingVertical="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintHorizontal_bias="0.117"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.023" />
+
+    <ImageButton
+        android:id="@+id/ibFilter"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Filter categories"
+        android:src="@android:drawable/ic_menu_more"
+        app:layout_constraintBottom_toBottomOf="@id/etSearchBar"
+        app:layout_constraintStart_toEndOf="@id/etSearchBar"
+        app:layout_constraintTop_toTopOf="@id/etSearchBar" />
 
     <Button
         android:id="@+id/btAdd"
